@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:robo_debug_app/components/button.dart';
+
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:network_info_plus/network_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() => runApp(const MyApp());
 
@@ -29,7 +35,13 @@ class ChatPage extends StatefulWidget {
 class ChatPageState extends State<ChatPage> {
   List<String> messages = [];
   late WebSocketChannel channel;
-  bool isLoading = false; // 接続中かどうかを管理するフラグ
+
+  bool isLoading = false;
+  bool isOnRed   = false;
+  bool isOnGreen = false;
+  bool isOnBlue  = false;
+  
+  String? ssid = "unknown";
 
   @override
   void initState() {
@@ -78,8 +90,22 @@ class ChatPageState extends State<ChatPage> {
   } 
 
   void sendMessage(String message) {
+    String send_message = "";
+    
     if (!isLoading) {
-      channel.sink.add(message);
+      if(message == "red"){
+        send_message = (isOnRed) ? "red off" : "red on";
+        isOnRed = !isOnRed;
+      }
+      if(message == "green"){
+        send_message = (isOnGreen) ? "green off" : "green on";
+        isOnGreen = !isOnGreen;
+      }
+      if(message == "blue"){
+        send_message = (isOnBlue) ? "blue off" : "blue on";
+        isOnBlue = !isOnBlue;
+      }
+      channel.sink.add(send_message);
     }
   }
 
@@ -91,6 +117,10 @@ class ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    
+    // リクエストを出す処理
+    LocationPermissionsHandler().request();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('WebSocket App'),
@@ -100,25 +130,110 @@ class ChatPageState extends State<ChatPage> {
            crossAxisAlignment: CrossAxisAlignment.center,
            mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
-              onPressed: () => sendMessage('red'),
-              child: const Text('Red'),
-            ),
-            ElevatedButton(
-              onPressed: () => sendMessage('green'),
-              child: const Text('Green'),
-            ),
-            ElevatedButton(
-              onPressed: () => sendMessage('blue'),
-              child: const Text('Blue'),
+            Row(
+              children: [
+                CustomTextButton(
+                  text: "Red",
+                  backgroundColor: Colors.red,
+                  enable: isOnRed,
+                  width: 60,
+                  height: 40,
+                  onPressed: (){
+                    sendMessage("red");
+                  }
+                ),
+                CustomTextButton(
+                  text: "Green",
+                  backgroundColor: Colors.green,
+                  enable: isOnGreen,
+                  width: 60,
+                  height: 40,
+                  onPressed: (){
+                    sendMessage("green");
+                  }
+                ),
+                CustomTextButton(
+                  text: "Blue",
+                  backgroundColor: Colors.blue,
+                  enable: isOnBlue,
+                  width: 60,
+                  height: 40,
+                  onPressed: (){
+                    sendMessage("blue");
+                  }
+                )
+              ],
             ),
             ElevatedButton(
               onPressed: isLoading ? null : reconnectToWebSocket,
               child: isLoading ? const CircularProgressIndicator() : const Text('Reconnect'),
             ),
+            Text(ssid ?? 'unknown'),
+            ElevatedButton(
+              onPressed: () async {
+                // Check if the device is connected to Wi-Fi
+                final ConnectivityResult connectivityResult = await Connectivity().checkConnectivity();
+                if (connectivityResult == ConnectivityResult.wifi) {
+                  // Get the current Wi-Fi network's SSID
+                  ssid = await NetworkInfo().getWifiBSSID();
+                  print('SSID: $ssid');
+                  ssid = await NetworkInfo().getWifiName();
+                  print('SSID: $ssid');
+                  ssid = await NetworkInfo().getWifiIP();
+                  print('SSID: $ssid');
+                  ssid = await NetworkInfo().getWifiGatewayIP();
+                  print('SSID: $ssid');
+
+                } else {
+                  print('Device is not connected to Wi-Fi');
+                }// Check if the device is connected to Wi-Fi
+              },
+              child: Text("get ssid"),
+            ),
           ],
         ),
       ),
     );
+  }
+}
+
+
+enum LocationPermissionStatus { granted, denied, permanentlyDenied, restricted }
+
+class LocationPermissionsHandler {
+  Future<bool> get isGranted async {
+    final status = await Permission.location.status;
+    switch (status) {
+      case PermissionStatus.granted:
+      case PermissionStatus.limited:
+        return true;
+      case PermissionStatus.denied:
+      case PermissionStatus.permanentlyDenied:
+      case PermissionStatus.restricted:
+        return false;
+      default:
+        return false;
+    }
+  }
+
+  Future<bool> get isAlwaysGranted {
+    return Permission.locationAlways.isGranted;
+  }
+
+  Future<LocationPermissionStatus> request() async {
+    final status = await Permission.location.request();
+    switch (status) {
+      case PermissionStatus.granted:
+        return LocationPermissionStatus.granted;
+      case PermissionStatus.denied:
+        return LocationPermissionStatus.denied;
+      case PermissionStatus.limited:
+      case PermissionStatus.permanentlyDenied:
+        return LocationPermissionStatus.permanentlyDenied;
+      case PermissionStatus.restricted:
+        return LocationPermissionStatus.restricted;
+      default:
+        return LocationPermissionStatus.denied;
+    }
   }
 }
