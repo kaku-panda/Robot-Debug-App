@@ -4,6 +4,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -46,18 +47,18 @@ class SplashScreenState extends ConsumerState<SplashScreen> with DeepLinkMixin{
   Widget build(BuildContext context){
 
     // 画面の向きを縦方向に固定
-    // SystemChrome.setPreferredOrientations([
-    //   DeviceOrientation.portraitUp,
-    //   DeviceOrientation.portraitDown,
-    // ]);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
 
     return Material(
       child: Container(
         decoration: Styles.gradientDecolation,
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(40.0),
-            child: Image.asset("assets/logo/logo.png"),
+            padding: const EdgeInsets.all(0.0),
+            child: Image.asset("assets/logo/logo.png",),
           ),
         ),
       ),
