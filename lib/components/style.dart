@@ -101,10 +101,10 @@ class Styles{
 
   static const gradientDecolation = BoxDecoration(
     gradient: LinearGradient(
-      colors: [primaryColor, secondaryColor],
+      colors: [Colors.green, Colors.black],
       begin: FractionalOffset(0.0, 0.0),
       end: FractionalOffset(1.0, 0.0),
-      stops: [0.0, 1.0],
+      stops: [0.0, 0.0],
       tileMode: TileMode.clamp
     )
   );

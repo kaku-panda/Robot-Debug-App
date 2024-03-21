@@ -1,53 +1,144 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+/// import
+////////////////////////////////////////////////////////////////////////////////////////////
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:robo_debug_app/components/button.dart';
-
+import 'package:flutter/gestures.dart';
+import 'package:go_router/go_router.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-void main() => runApp(const MyApp());
+// my screens
+import 'package:robo_debug_app/app_navigation_bar.dart';
+import 'package:robo_debug_app/screens/splash_screen.dart';
+import 'package:robo_debug_app/screens/console.dart';
+import 'package:robo_debug_app/screens/parameters.dart';
+import 'package:robo_debug_app/screens/motor.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+// my components
+import 'package:robo_debug_app/components/style.dart';
+import 'package:robo_debug_app/providers/deep_link_mixin.dart';
+import 'package:robo_debug_app/providers/setting_provider.dart';
+import 'package:robo_debug_app/components/button.dart';
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Chat app',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+final settingProvider  = ChangeNotifierProvider((ref) => SettingProvider());
+final deepLinkProvider = ChangeNotifierProvider((ref) => DeepLinkProvider());
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
+final routerProvider   = Provider<GoRouter>((ref) {
+  return GoRouter(
+    navigatorKey: rootNavigatorKey,
+    initialLocation: '/splash',
+    redirect: (BuildContext context, GoRouterState state) {
+      if (state.uri.path == '/splash') {
+        return null;
+      }
+    },
+    routes: [
+      StatefulShellRoute.indexedStack(
+        parentNavigatorKey: rootNavigatorKey,
+        builder:(context, state, navigationShell){
+          return AppNavigationBar(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            routes:[
+              GoRoute(
+                name: 'motor',
+                path: '/motor',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const MotorScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes:[
+              GoRoute(
+                name: 'console',
+                path: '/console',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const ConsoleScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes:[
+              GoRoute(
+                name: 'parameters',
+                path: '/parameters',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const ParametersScreen(),
+                ),
+              ),
+            ],
+          ),
+        ]
       ),
-      home: const ChatPage(),
-    );
-  }
+      GoRoute(
+      name: 'spalash',
+      path: '/splash',
+      pageBuilder: (context, state) => MaterialPage(
+          key: state.pageKey,
+          child: const SplashScreen(),
+        ),
+      ),
+    ],
+  );
+},);
+
+
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(
+    const ProviderScope(
+      child: MyApp()
+    )
+  );
 }
 
-class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+class MyApp extends ConsumerStatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+  @override
+  MyAppState createState() => MyAppState();
+}
+class MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
+  
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(settingProvider).appBarHeight = AppBar().preferredSize.height;
+      ref.read(settingProvider).navigationBarHeight = 56.0;
+      ref.read(settingProvider).screenPaddingTop = MediaQuery.of(context).padding.top;
+      ref.read(settingProvider).screenPaddingBottom = MediaQuery.of(context).padding.bottom;
+      WidgetsBinding.instance.addObserver(this);
+      connectToWebSocket();
+    },);
+  }
 
   @override
-  ChatPageState createState() => ChatPageState();
-}
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    channel.sink.close();
+    super.dispose();
+  }
 
-class ChatPageState extends State<ChatPage> {
   List<String> messages = [];
   late WebSocketChannel channel;
 
   bool isLoading = false;
-  bool isOnRed   = false;
-  bool isOnGreen = false;
-  bool isOnBlue  = false;
   
   String? ssid = "unknown";
-
-  @override
-  void initState() {
-    super.initState();
-    connectToWebSocket();
-  }
 
   void connectToWebSocket() async {
     isLoading = true;
@@ -90,113 +181,97 @@ class ChatPageState extends State<ChatPage> {
   } 
 
   void sendMessage(String message) {
-    String send_message = "";
     
-    if (!isLoading) {
-      if(message == "red"){
-        send_message = (isOnRed) ? "red off" : "red on";
-        isOnRed = !isOnRed;
-      }
-      if(message == "green"){
-        send_message = (isOnGreen) ? "green off" : "green on";
-        isOnGreen = !isOnGreen;
-      }
-      if(message == "blue"){
-        send_message = (isOnBlue) ? "blue off" : "blue on";
-        isOnBlue = !isOnBlue;
-      }
-      channel.sink.add(send_message);
-    }
+      channel.sink.add(message);
   }
 
   @override
-  void dispose() {
-    channel.sink.close();
-    super.dispose();
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    ref.read(settingProvider).isRotating = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(settingProvider).appBarHeight = AppBar().preferredSize.height;
+      ref.read(settingProvider).navigationBarHeight = 56.0;
+      ref.read(settingProvider).screenPaddingTop = MediaQuery.of(context).padding.top;
+      ref.read(settingProvider).screenPaddingBottom = MediaQuery.of(context).padding.bottom;
+      ref.read(settingProvider).isRotating = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    
+
     // リクエストを出す処理
     LocationPermissionsHandler().request();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('WebSocket App'),
-      ),
-      body: Center(
-        child: Column(
-           crossAxisAlignment: CrossAxisAlignment.center,
-           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                CustomTextButton(
-                  text: "Red",
-                  backgroundColor: Colors.red,
-                  enable: isOnRed,
-                  width: 60,
-                  height: 40,
-                  onPressed: (){
-                    sendMessage("red");
-                  }
-                ),
-                CustomTextButton(
-                  text: "Green",
-                  backgroundColor: Colors.green,
-                  enable: isOnGreen,
-                  width: 60,
-                  height: 40,
-                  onPressed: (){
-                    sendMessage("green");
-                  }
-                ),
-                CustomTextButton(
-                  text: "Blue",
-                  backgroundColor: Colors.blue,
-                  enable: isOnBlue,
-                  width: 60,
-                  height: 40,
-                  onPressed: (){
-                    sendMessage("blue");
-                  }
-                )
-              ],
-            ),
-            ElevatedButton(
-              onPressed: isLoading ? null : reconnectToWebSocket,
-              child: isLoading ? const CircularProgressIndicator() : const Text('Reconnect'),
-            ),
-            Text(ssid ?? 'unknown'),
-            ElevatedButton(
-              onPressed: () async {
-                // Check if the device is connected to Wi-Fi
-                final ConnectivityResult connectivityResult = await Connectivity().checkConnectivity();
-                if (connectivityResult == ConnectivityResult.wifi) {
-                  // Get the current Wi-Fi network's SSID
-                  ssid = await NetworkInfo().getWifiBSSID();
-                  print('SSID: $ssid');
-                  ssid = await NetworkInfo().getWifiName();
-                  print('SSID: $ssid');
-                  ssid = await NetworkInfo().getWifiIP();
-                  print('SSID: $ssid');
-                  ssid = await NetworkInfo().getWifiGatewayIP();
-                  print('SSID: $ssid');
+    ref.read(settingProvider).loadPreferences();
+    final isDark = ref.watch(settingProvider).enableDarkTheme;
+    final router = ref.watch(routerProvider);
 
-                } else {
-                  print('Device is not connected to Wi-Fi');
-                }// Check if the device is connected to Wi-Fi
-              },
-              child: Text("get ssid"),
-            ),
-          ],
+    return MaterialApp.router(
+      title: 'Shifty',
+      theme: ThemeData(
+        scaffoldBackgroundColor: Styles.lightBgColor,
+        primaryColor: Styles.primaryColor,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Styles.lightColor,
+          elevation: 0.4,
+          scrolledUnderElevation: 0.4,
+          shadowColor: Colors.black,
         ),
+        cupertinoOverrideTheme: const CupertinoThemeData(
+          primaryColor: Colors.black,
+          brightness: Brightness.light,
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Styles.lightColor,
+          selectedItemColor: Styles.primaryColor,
+          unselectedItemColor: Colors.grey,
+        ),
+        brightness: Brightness.light
+      ),
+      darkTheme: ThemeData(
+        scaffoldBackgroundColor: Styles.darkBgColor,
+        primaryColor: Styles.primaryColor,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Styles.darkColor,
+          elevation: 0.4,
+          scrolledUnderElevation: 0.4,
+          shadowColor: Color(0xFF8C8C8C),
+        ),
+        cupertinoOverrideTheme: const CupertinoThemeData(
+          primaryColor: Colors.white,
+          brightness: Brightness.dark,
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Styles.darkColor,
+          selectedItemColor: Styles.primaryColor,
+          unselectedItemColor: Styles.hiddenColor,
+        ),
+        brightness: Brightness.dark,
+        
+      ),
+      
+      themeMode: (isDark) ? ThemeMode.dark : ThemeMode.light,
+
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates:const  [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('ja', ''),],
+
+      routeInformationProvider: router.routeInformationProvider,
+      routeInformationParser: router.routeInformationParser,
+      routerDelegate: router.routerDelegate,
+
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch, PointerDeviceKind.stylus, PointerDeviceKind.unknown},
       ),
     );
   }
 }
-
 
 enum LocationPermissionStatus { granted, denied, permanentlyDenied, restricted }
 
