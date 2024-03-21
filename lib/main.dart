@@ -7,10 +7,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:go_router/go_router.dart';
-import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:network_info_plus/network_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 // my screens
@@ -18,13 +14,14 @@ import 'package:robo_debug_app/app_navigation_bar.dart';
 import 'package:robo_debug_app/screens/splash_screen.dart';
 import 'package:robo_debug_app/screens/console.dart';
 import 'package:robo_debug_app/screens/parameters.dart';
+import 'package:robo_debug_app/screens/joystick.dart';
 import 'package:robo_debug_app/screens/motor.dart';
 
 // my components
 import 'package:robo_debug_app/components/style.dart';
 import 'package:robo_debug_app/providers/deep_link_mixin.dart';
 import 'package:robo_debug_app/providers/setting_provider.dart';
-import 'package:robo_debug_app/components/button.dart';
+
 
 final settingProvider  = ChangeNotifierProvider((ref) => SettingProvider());
 final deepLinkProvider = ChangeNotifierProvider((ref) => DeepLinkProvider());
@@ -73,6 +70,18 @@ final routerProvider   = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes:[
               GoRoute(
+                name: 'joystick',
+                path: '/joystick',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const JoystickScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes:[
+              GoRoute(
                 name: 'parameters',
                 path: '/parameters',
                 pageBuilder: (context, state) => NoTransitionPage(
@@ -107,7 +116,7 @@ void main() async{
 }
 
 class MyApp extends ConsumerStatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
   @override
   MyAppState createState() => MyAppState();
 }
@@ -122,67 +131,13 @@ class MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
       ref.read(settingProvider).screenPaddingTop = MediaQuery.of(context).padding.top;
       ref.read(settingProvider).screenPaddingBottom = MediaQuery.of(context).padding.bottom;
       WidgetsBinding.instance.addObserver(this);
-      connectToWebSocket();
     },);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    channel.sink.close();
     super.dispose();
-  }
-
-  List<String> messages = [];
-  late WebSocketChannel channel;
-
-  bool isLoading = false;
-  
-  String? ssid = "unknown";
-
-  void connectToWebSocket() async {
-    isLoading = true;
-    setState(() {});
-    try {
-      channel = IOWebSocketChannel.connect(Uri.parse('ws://192.168.42.1:8081'));
-      channel.stream.listen((message) {
-        setState(() {
-          messages.add(message);
-        });
-      });
-    } catch (e) {
-      print(e.toString());
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
- 
-  void reconnectToWebSocket() async {
-    setState(() {
-      isLoading = true;
-    });
-    try {
-      channel.sink.close();
-      channel = IOWebSocketChannel.connect(Uri.parse('ws://192.168.42.1:8081'));
-      channel.stream.listen((message) {
-        setState(() {
-          messages.add(message);
-        });
-      });
-    } catch (e) {
-      print(e.toString());
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  } 
-
-  void sendMessage(String message) {
-    
-      channel.sink.add(message);
   }
 
   @override

@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 /// import
 ////////////////////////////////////////////////////////////////////////////////////////////
+library;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -74,13 +75,13 @@ class AppNavigationBar extends ConsumerWidget {
           },
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(PopIcons.wheelchair, size: 24),
-              activeIcon: Icon(PopIcons.wheelchair, size: 28),
+              icon: Icon(PopIcons.taxi, size: 24),
+              activeIcon: Icon(PopIcons.taxi, size: 28),
               label: 'Motor',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.chat, size: 24),
-              activeIcon: Icon(Icons.cabin, size: 28),
+              activeIcon: Icon(Icons.chat, size: 28),
               label: 'Console',
             ),
             BottomNavigationBarItem(
