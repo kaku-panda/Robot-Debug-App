@@ -31,7 +31,7 @@ class AppNavigationBar extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(vertical: 40),
           children: [
             ListTile(
-              leading: const Icon(PopIcons.wheelchair, size: 28),
+              leading: const Icon(Icons.car_rental, size: 28),
               title: const Text('Motor'),
               onTap: () => navigationShell.goBranch(0),
             ),
@@ -75,8 +75,8 @@ class AppNavigationBar extends ConsumerWidget {
           },
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(PopIcons.taxi, size: 24),
-              activeIcon: Icon(PopIcons.taxi, size: 28),
+              icon: Icon(Icons.car_rental, size: 24),
+              activeIcon: Icon(Icons.car_rental, size: 28),
               label: 'Motor',
             ),
             BottomNavigationBarItem(

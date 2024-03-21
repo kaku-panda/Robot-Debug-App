@@ -31,7 +31,6 @@ class ConsoleScreen extends ConsumerStatefulWidget {
 
 class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProviderStateMixin {
   
-
   double appBarHeight = 0;
   Size screenSize = const Size(0, 0);
 
