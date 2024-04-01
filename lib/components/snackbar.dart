@@ -6,7 +6,7 @@ enum SnackBarType { info, warning, error }
 
 class SnackBarManager {
   static final List<OverlayEntry> _snackBars = [];
-  static const int maxSnackBars = 3;
+  static const int maxSnackBars = 2;
   
   static void removeSnackBar(OverlayEntry entry) {
     _snackBars.remove(entry);
@@ -98,6 +98,7 @@ void showSnackBar({
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
               child: Container(
+                height: 40,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: SnackBarManager.getSnackBarColor(type),
@@ -119,11 +120,11 @@ void showSnackBar({
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
                       child: Icon(SnackBarManager.getSnackIcon(type), color: Colors.white, size: 15),
                     ),
-                    Expanded(
+                    Flexible(
                       child: Text(
                         message,
                         style: Styles.defaultStyleWhite13,
-                        softWrap: true,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     IconButton(

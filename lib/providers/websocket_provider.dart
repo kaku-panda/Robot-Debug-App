@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:robo_debug_app/components/snackbar.dart';
 import 'package:web_socket_channel/io.dart';
@@ -26,7 +27,7 @@ class WebSocketProvider extends ChangeNotifier {
 
   void connect(String uri) {
     // 接続状態を「接続中」に更新し、変更を通知
-    updateStatus(ConnectionStatusType.connecting, "Connecting to $uri...", SnackBarType.info);
+    updateStatus(ConnectionStatusType.connecting, "Connecting to $uri ...", SnackBarType.info);
 
     try {
       if (_channel != null) {
@@ -53,12 +54,13 @@ class WebSocketProvider extends ChangeNotifier {
     }
   }
 
-  void sendMessage(String message) {
-    if (_channel != null) {
+  void sendMessage(dynamic message) {
+    if (_channel != null && _status == ConnectionStatusType.connected) {
       _channel!.sink.add(message);
+      updateStatus(ConnectionStatusType.connected, "send '$message'", SnackBarType.info);
     } else {
       // WebSocketが接続されていない場合の処理
-      updateStatus(ConnectionStatusType.disconnected, "WebSocket Channel is not connected", SnackBarType.error);
+      updateStatus(_status, "WebSocket Channel is not connected", SnackBarType.error,);
     }
   }
 

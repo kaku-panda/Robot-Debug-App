@@ -6,7 +6,7 @@ import 'package:robo_debug_app/components/style.dart';
 import 'package:robo_debug_app/main.dart';
 
 const ballSize = 20.0;
-const step = 40.0;
+const step = 5.0;
 
 class JoystickScreen extends ConsumerStatefulWidget {
   const JoystickScreen({super.key});
@@ -25,6 +25,9 @@ class JoystickScreenState extends ConsumerState<JoystickScreen> with SingleTicke
   AnimationController? _controller;
   Animation<double>? _animationX;
   Animation<double>? _animationY;
+
+  int leftMotorSpeed  = 0;
+  int rightMotorSpeed = 0;
 
   @override
   void initState() {
@@ -45,6 +48,7 @@ class JoystickScreenState extends ConsumerState<JoystickScreen> with SingleTicke
   
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Joystick'),
@@ -65,7 +69,14 @@ class JoystickScreenState extends ConsumerState<JoystickScreen> with SingleTicke
             Container(
               color: Styles.darkBgColor,
             ),
-            Ball(_x, _y),
+            // Ball(_x, _y),
+            Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 150.0),
+                child: MotorSpeedDisplay(leftMotorSpeed: leftMotorSpeed, rightMotorSpeed: rightMotorSpeed),
+              ),
+            ),
             Align(
               alignment: const Alignment(0, 0.8),
               child: Joystick(
@@ -74,8 +85,8 @@ class JoystickScreenState extends ConsumerState<JoystickScreen> with SingleTicke
                   final newX = _x + step * details.x;
                   final newY = _y + step * details.y;
 
-                  int leftMotorSpeed  = (-details.y*100 + details.x*100).clamp(-100, 100).toInt();
-                  int rightMotorSpeed = (-details.y*100 - details.x*100).clamp(-100, 100).toInt();
+                  leftMotorSpeed  = (-details.y*100 + details.x*100).clamp(-100, 100).toInt();
+                  rightMotorSpeed = (-details.y*100 - details.x*100).clamp(-100, 100).toInt();
                   
                   String message = "accel ${((leftMotorSpeed & 0xFF) << 8) | (rightMotorSpeed & 0xFF)}";
                   ref.read(webSocketProvider.notifier).sendMessage(message);
@@ -166,6 +177,52 @@ class Ball extends StatelessWidget {
             )
           ],
         ),
+      ),
+    );
+  }
+}
+
+class MotorSpeedDisplay extends StatelessWidget {
+  final int leftMotorSpeed;
+  final int rightMotorSpeed;
+
+  const MotorSpeedDisplay({
+    super.key,
+    required this.leftMotorSpeed,
+    required this.rightMotorSpeed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildMotorSpeedLabel('Left:', Colors.orangeAccent),
+        _buildMotorSpeedValue(leftMotorSpeed, Colors.orangeAccent),
+        const SizedBox(width: 20),
+        _buildMotorSpeedLabel('Right:', Colors.blueAccent),
+        _buildMotorSpeedValue(rightMotorSpeed, Colors.blueAccent),
+      ],
+    );
+  }
+
+  Widget _buildMotorSpeedLabel(String label, Color color) {
+    return SizedBox(
+      width: 50,
+      child: Text(
+        label,
+        style: Styles.defaultStyle18.copyWith(color: color),
+      ),
+    );
+  }
+
+  Widget _buildMotorSpeedValue(int speed, Color color) {
+    return SizedBox(
+      width: 50,
+      child: Text(
+        '$speed',
+        textAlign: TextAlign.right,
+        style: Styles.defaultStyle18.copyWith(color: color),
       ),
     );
   }
