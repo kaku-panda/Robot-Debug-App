@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingProvider extends ChangeNotifier {
   
-  String _webSocketAddress = '192.168.1.42:8081';
+  String _webSocketAddress = '192.168.42.1:8081';
   
   bool _enableDarkTheme = true;
   bool _defaultShiftView = false;
@@ -15,9 +15,9 @@ class SettingProvider extends ChangeNotifier {
   bool isEditting = false;
   bool isRotating = false;
   
-  double _screenPaddngTop = 0.0;
-  double _screenPaddngBottom = 0.0;
-  double _appBarHeight = 0.0;
+  double _screenPaddngTop     = 0.0;
+  double _screenPaddngBottom  = 0.0;
+  double _appBarHeight        = 0.0;
   double _navigationBarHeight = 0.0;
 
   double _kp = 0;
@@ -93,7 +93,7 @@ class SettingProvider extends ChangeNotifier {
     _enableDarkTheme = prefs.getBool('enableDarkTheme') ?? true;
     _defaultShiftView = prefs.getBool('defaultShiftView') ?? false;
     
-    _webSocketAddress = prefs.getString('webSocketAddress') ?? '192.169.1.42:8081';
+    _webSocketAddress = prefs.getString('webSocketAddress') ?? '192.169.42.1:8081';
 
     _kp = prefs.getDouble('kp') ?? 0;
     _ki = prefs.getDouble('ki') ?? 0;

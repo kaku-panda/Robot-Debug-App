@@ -1,14 +1,16 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 /// import
 ////////////////////////////////////////////////////////////////////////////////////////////
+library;
 import 'dart:async';
-
+import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:network_info_plus/network_info_plus.dart';
+import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:robo_debug_app/components/snackbar.dart';
 import 'package:robo_debug_app/components/style.dart';
 import 'package:robo_debug_app/database/console_log.dart';
@@ -16,8 +18,6 @@ import 'package:robo_debug_app/database/console_log.dart';
 // my package
 import 'package:robo_debug_app/main.dart';
 import 'package:robo_debug_app/database/database_helper.dart';
-import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 /// Home 画面
@@ -36,11 +36,11 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
 
   // for web socket
   List<String> messages = [];
-  late WebSocketChannel channel;
+  WebSocketChannel? channel;
 
   // TextField の動作をスムーズにするための変数
   final FocusNode focusNode = FocusNode();
-  final TextEditingController textController = TextEditingController();
+  late TextEditingController textController;
 
   // ssid 監視用
   String? ssid = '';
@@ -54,18 +54,24 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
 
   @override
   void initState() {
+    super.initState();
+    textController = TextEditingController();
     initConnectivity();
-    channel = IOWebSocketChannel.connect(Uri.parse('ws://192.168.42.1:8081'));
     connectivitySubscription = Connectivity().onConnectivityChanged.listen(updateConnectionStatus);
     logs = [];
-    fetchConsoleLog();
-    super.initState();
+    fetchConsoleLog().then((_) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => scrollToBottom()
+      );
+    });
   }
 
   @override
   void dispose() {
     connectivitySubscription?.cancel();
-    channel.sink.close();
+    if(channel != null){
+      channel!.sink.close();
+    }
     scrollController.dispose();
     super.dispose();
   }
@@ -101,7 +107,8 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
               child: Icon(Icons.connect_without_contact, size: 30),
             ),
             onPressed: (){
-              reconnectToWebSocket();
+              final url = 'ws://${ref.read(settingProvider).webSocketAddress}';
+              ref.read(webSocketProvider).connect(url);
             },
           )
         ],
@@ -121,14 +128,19 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text('${logs[index].content} ', style: logs[index].isError ? Styles.defaultStyleRed15 : Styles.defaultStyleGreen15),
-                          Text('[${DateFormat('MM/dd/hh:mm:ss').format(logs[index].dateTime)}] <', style: Styles.defaultStyleGrey13),
+                          Expanded(
+                            child: Text('[${DateFormat('MM/dd/hh:mm:ss').format(logs[index].dateTime)}] <', style: Styles.defaultStyleGrey13, softWrap: true,),
+                          ),
                         ],
                       )
                       : Row(
                         mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('> [${DateFormat('MM/dd/hh:mm:ss').format(logs[index].dateTime)}]', style: Styles.defaultStyleGrey13),
-                          Text(' ${logs[index].content}', style: logs[index].isError ? Styles.defaultStyleRed15 : Styles.defaultStyleGreen15),
+                          Expanded(
+                            child: Text(' ${logs[index].content}', style: logs[index].isError ? Styles.defaultStyleRed15 : Styles.defaultStyleGreen15, softWrap: true,),
+                          ),
                         ],
                       );
                     }
@@ -170,10 +182,11 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
                         FocusScope.of(context).requestFocus(focusNode);
                       },
                       onSubmitted: (value){
-                        ConsoleLog newLog = ConsoleLog(dateTime: DateTime.now(), content: textController.text, isError: false, fromRobot: false);
-                        insertLog(newLog);
-                        scrollToBottom();
-                        sendMessage(value);
+                        insertLog(
+                          ConsoleLog(dateTime: DateTime.now(), content: textController.text, isError: false, fromRobot: false),
+                        );
+                        //sendMessage(value);
+                        ref.read(webSocketProvider).sendMessage(value);
                         textController.clear();
                       },
                     ),
@@ -187,17 +200,16 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
     );
   }
 
-  // データベースの内容をページに反映
   fetchConsoleLog() async {
     List<Map<String, dynamic>> result = await dbHelper.getAllData();
-    setState(() {
-      logs = result.map((map) => ConsoleLog.fromMap(map)).toList();
-    });
+    logs = result.map((map) => ConsoleLog.fromMap(map)).toList();
+    scrollToBottom();
   }
 
   insertLog(ConsoleLog log) async {
-    await dbHelper.insertData(log.toMap());
-    fetchConsoleLog();
+    dbHelper.insertData(log.toMap()).then((value){
+      fetchConsoleLog();
+    });
   }
   
   updateLog(ConsoleLog log) async {
@@ -210,7 +222,6 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
     fetchConsoleLog();
   }
 
-  // scrollbar
   void scrollToBottom() {
     if (scrollController.hasClients) {
       scrollController.animateTo(
@@ -221,51 +232,90 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
     }
   }
   
-  void reconnectToWebSocket() async {
-    showSnackBar(
-      context: context,
-      message: 'connectting to ws://${ref.watch(settingProvider).webSocketAddress}',
-      type: SnackBarType.info
-    );
-    try {
-      channel.sink.close();
-      channel = IOWebSocketChannel.connect(Uri.parse('ws://${ref.read(settingProvider).webSocketAddress}'));
-      channel.stream.timeout(
-        const Duration(seconds: 10),
-        onTimeout: (sink) {
-          sink.addError('Connection timed out');
-          showSnackBar(
-            context: context,
-            message: 'Connection timed out',
-            type: SnackBarType.error
-          );
-        },
-      ).listen((message) {
-        showSnackBar(
-          context: context,
-          message: message,
-          type: SnackBarType.info
-        );
-      });
-    } catch (e) {
-      showSnackBar(
-        context: context,
-        message: e.toString(),
-        type: SnackBarType.error
-      );
-    }
-  }
+  //void connectToWebSocket() async {
+  //  String message = 'connecting to ws://${ref.watch(settingProvider).webSocketAddress}';
+  //  insertLog(
+  //    ConsoleLog(dateTime: DateTime.now(), content: message, isError: false, fromRobot: false))
+  //  ;
+  //  showSnackBar(
+  //    context: context,
+  //    message: 'Connecting to ws://${ref.watch(settingProvider).webSocketAddress}',
+  //    type: SnackBarType.info,
+  //    duration: const Duration(seconds: 5),
+  //  );
 
-  void sendMessage(String message) {
-    showSnackBar(
-      context: context,
-      message: 'send $message',
-      type: SnackBarType.info
-    );
-    channel.sink.add(message);
-  }
+  //  try {
+  //    if (channel != null) {
+  //      await channel!.sink.close();
+  //    }
+  //    final url = 'ws://${ref.read(settingProvider).webSocketAddress}';
+  //    channel = IOWebSocketChannel.connect(Uri.parse(url));
 
-    Future<void> initConnectivity() async {
+  //    channel!.stream.listen((message) {
+  //      insertLog(
+  //        ConsoleLog(dateTime: DateTime.now(), content: message, isError: false, fromRobot: false)
+  //      );
+  //      showSnackBar(
+  //        context: context,
+  //        message: message,
+  //        type: SnackBarType.info,
+  //        duration: const Duration(seconds: 5),
+  //      );
+  //    }, onError: (error) {
+  //      message = 'Stream error: $error';
+  //      insertLog(
+  //        ConsoleLog(dateTime: DateTime.now(), content: message, isError: true, fromRobot: false)
+  //      );
+  //      showSnackBar(
+  //        context: context,
+  //        message: message,
+  //        type: SnackBarType.error,
+  //        duration: const Duration(seconds: 5),
+  //      );
+  //    });
+  //  } on SocketException catch (e) {
+  //      message = 'SocketException: ${e.message}';
+  //      insertLog(
+  //        ConsoleLog(dateTime: DateTime.now(), content: message, isError: true, fromRobot: false)
+  //      );
+  //    showSnackBar(
+  //      context: context,
+  //      message: 'SocketException: ${e.message}',
+  //      type: SnackBarType.error,
+  //      duration: const Duration(seconds: 5),
+  //    );
+  //  } catch (e) {
+  //    message = 'Exception: $e';
+  //    insertLog(
+  //      ConsoleLog(dateTime: DateTime.now(), content: message, isError: true, fromRobot: false)
+  //    );
+  //    showSnackBar(
+  //      context: context,
+  //      message: 'Exception: $e',
+  //      type: SnackBarType.error,
+  //      duration: const Duration(seconds: 5),
+  //    );
+  //  }
+  //}
+
+  //void sendMessage(String message) {
+  //  if(channel != null){
+  //    showSnackBar(
+  //      context: context,
+  //      message: 'send $message',
+  //      type: SnackBarType.info
+  //    );
+  //    channel!.sink.add(message);
+  //  }else{
+  //    showSnackBar(
+  //      context: context,
+  //      message: 'not connected to WebSocket Server',
+  //      type: SnackBarType.error
+  //    );
+  //  }
+  //}
+
+  Future<void> initConnectivity() async {
     final ConnectivityResult result = await Connectivity().checkConnectivity();
     await updateConnectionStatus(result);
   }

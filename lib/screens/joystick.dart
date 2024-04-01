@@ -3,38 +3,41 @@ import 'package:flutter_joystick/flutter_joystick.dart';
 import 'package:robo_debug_app/components/style.dart';
 
 const ballSize = 20.0;
-const step = 10.0;
+const step = 40.0;
 
-class JoystickScreen extends StatelessWidget {
+class JoystickScreen extends StatefulWidget {
   const JoystickScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      width: double.infinity,
-      child: JoystickExample()
-    );
-  }
+  State<JoystickScreen> createState() => _JoystickExampleState();
 }
 
-class JoystickExample extends StatefulWidget {
-  const JoystickExample({super.key});
-
-  @override
-  State<JoystickExample> createState() => _JoystickExampleState();
-}
-
-class _JoystickExampleState extends State<JoystickExample> {
+class _JoystickExampleState extends State<JoystickScreen> with SingleTickerProviderStateMixin {
   double _x = 100;
   double _y = 100;
   JoystickMode _joystickMode = JoystickMode.all;
 
+  AnimationController? _controller;
+  Animation<double>? _animationX;
+  Animation<double>? _animationY;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
   @override
   void didChangeDependencies() {
     _x = MediaQuery.of(context).size.width / 2 - ballSize / 2;
     super.didChangeDependencies();
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,10 +66,21 @@ class _JoystickExampleState extends State<JoystickExample> {
               child: Joystick(
                 mode: _joystickMode,
                 listener: (details) {
-                  setState(() {
-                    _x = _x + step * details.x;
-                    _y = _y + step * details.y;
-                  });
+                  final newX = _x + step * details.x;
+                  final newY = _y + step * details.y;
+                  _animationX = Tween<double>(begin: _x, end: newX).animate(_controller!)
+                    ..addListener(() {
+                      setState(() {
+                        _x = _animationX!.value;
+                      });
+                    });
+                  _animationY = Tween<double>(begin: _y, end: newY).animate(_controller!)
+                    ..addListener(() {
+                      setState(() {
+                        _y = _animationY!.value;
+                      });
+                    });
+                  _controller!.forward(from: 0.0);
                 },
               ),
             ),

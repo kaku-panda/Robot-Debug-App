@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:robo_debug_app/components/style.dart';
+import 'package:robo_debug_app/main.dart';
 
 enum SnackBarType { info, warning, error }
 
@@ -58,12 +59,13 @@ class SnackBarManager {
 }
 
 void showSnackBar({
-  required BuildContext context,
   required String message,
   required SnackBarType type,
   Duration duration = const Duration(seconds: 2),
 }) {
-  final overlay = Overlay.of(context);
+
+  final overlay = rootNavigatorKey.currentState?.overlay;
+  if (overlay == null) return;
   
   AnimationController controller = AnimationController(
     duration: const Duration(milliseconds: 100),
@@ -97,7 +99,6 @@ void showSnackBar({
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
               child: Container(
                 width: double.infinity,
-                height: 40,
                 decoration: BoxDecoration(
                   color: SnackBarManager.getSnackBarColor(type),
                   borderRadius: BorderRadius.circular(5),
@@ -122,6 +123,7 @@ void showSnackBar({
                       child: Text(
                         message,
                         style: Styles.defaultStyleWhite13,
+                        softWrap: true,
                       ),
                     ),
                     IconButton(

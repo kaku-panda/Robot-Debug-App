@@ -53,6 +53,7 @@ class AppNavigationBar extends ConsumerWidget {
           ],
         ),
       ) : null,
+      resizeToAvoidBottomInset: true,
       bottomNavigationBar: !isLandscape ? Container(
         height: 56.0 + MediaQuery.of(context).padding.bottom,
         decoration: const BoxDecoration(
@@ -64,6 +65,7 @@ class AppNavigationBar extends ConsumerWidget {
           ],
         ),
         child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
           currentIndex: currentIndex,
           selectedFontSize: 11,
           unselectedFontSize: 10,
@@ -95,7 +97,6 @@ class AppNavigationBar extends ConsumerWidget {
               label: 'Parameters',
             ),
           ],
-          type: BottomNavigationBarType.fixed,
           fixedColor: Styles.primaryColor,
         ),
       ) : null,

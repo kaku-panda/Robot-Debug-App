@@ -11,7 +11,8 @@ import 'package:permission_handler/permission_handler.dart';
 
 // my screens
 import 'package:robo_debug_app/app_navigation_bar.dart';
-import 'package:robo_debug_app/screens/splash_screen.dart';
+import 'package:robo_debug_app/providers/websocket_provider.dart';
+import 'package:robo_debug_app/screens/splash.dart';
 import 'package:robo_debug_app/screens/console.dart';
 import 'package:robo_debug_app/screens/parameters.dart';
 import 'package:robo_debug_app/screens/joystick.dart';
@@ -23,9 +24,11 @@ import 'package:robo_debug_app/providers/deep_link_mixin.dart';
 import 'package:robo_debug_app/providers/setting_provider.dart';
 
 
-final settingProvider  = ChangeNotifierProvider((ref) => SettingProvider());
-final deepLinkProvider = ChangeNotifierProvider((ref) => DeepLinkProvider());
-final rootNavigatorKey = GlobalKey<NavigatorState>();
+final settingProvider   = ChangeNotifierProvider((ref) => SettingProvider());
+final deepLinkProvider  = ChangeNotifierProvider((ref) => DeepLinkProvider());
+final webSocketProvider = ChangeNotifierProvider((ref) => WebSocketProvider());
+
+final rootNavigatorKey  = GlobalKey<NavigatorState>();
 
 final routerProvider   = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -164,7 +167,7 @@ class MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
-      title: 'Shifty',
+      title: 'Robo Debug App',
       theme: ThemeData(
         scaffoldBackgroundColor: Styles.lightBgColor,
         primaryColor: Styles.primaryColor,
