@@ -1,20 +1,25 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_joystick/flutter_joystick.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:robo_debug_app/components/style.dart';
+import 'package:robo_debug_app/main.dart';
 
 const ballSize = 20.0;
 const step = 40.0;
 
-class JoystickScreen extends StatefulWidget {
+class JoystickScreen extends ConsumerStatefulWidget {
   const JoystickScreen({super.key});
 
   @override
-  State<JoystickScreen> createState() => _JoystickExampleState();
+  ConsumerState<JoystickScreen> createState() => JoystickScreenState();
 }
 
-class _JoystickExampleState extends State<JoystickScreen> with SingleTickerProviderStateMixin {
+class JoystickScreenState extends ConsumerState<JoystickScreen> with SingleTickerProviderStateMixin {
+  
   double _x = 100;
   double _y = 100;
+
   JoystickMode _joystickMode = JoystickMode.all;
 
   AnimationController? _controller;
@@ -68,6 +73,13 @@ class _JoystickExampleState extends State<JoystickScreen> with SingleTickerProvi
                 listener: (details) {
                   final newX = _x + step * details.x;
                   final newY = _y + step * details.y;
+
+                  int leftMotorSpeed  = (-details.y*100 + details.x*100).clamp(-100, 100).toInt();
+                  int rightMotorSpeed = (-details.y*100 - details.x*100).clamp(-100, 100).toInt();
+                  
+                  String message = "accel ${((leftMotorSpeed & 0xFF) << 8) | (rightMotorSpeed & 0xFF)}";
+                  ref.read(webSocketProvider.notifier).sendMessage(message);
+
                   _animationX = Tween<double>(begin: _x, end: newX).animate(_controller!)
                     ..addListener(() {
                       setState(() {

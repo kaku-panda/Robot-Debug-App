@@ -3,15 +3,12 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 library;
 import 'dart:async';
-import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:network_info_plus/network_info_plus.dart';
-import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:robo_debug_app/components/snackbar.dart';
+import 'package:robo_debug_app/providers/websocket_provider.dart';
 import 'package:robo_debug_app/components/style.dart';
 import 'package:robo_debug_app/database/console_log.dart';
 
@@ -36,7 +33,6 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
 
   // for web socket
   List<String> messages = [];
-  WebSocketChannel? channel;
 
   // TextField の動作をスムーズにするための変数
   final FocusNode focusNode = FocusNode();
@@ -69,9 +65,6 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
   @override
   void dispose() {
     connectivitySubscription?.cancel();
-    if(channel != null){
-      channel!.sink.close();
-    }
     scrollController.dispose();
     super.dispose();
   }
@@ -90,6 +83,34 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
           ref.watch(settingProvider).screenPaddingBottom,
     );
 
+    final connectionStatus = ref.watch(webSocketProvider).status;
+
+    IconData      iconData;
+    VoidCallback? onPressed;
+
+    switch (connectionStatus) {
+      case ConnectionStatusType.connected:
+        iconData = Icons.link_off;
+        onPressed = () {
+          ref.read(webSocketProvider).disconnect();
+        };
+        break;
+      case ConnectionStatusType.connecting:
+        iconData = Icons.cancel;
+        onPressed = () {
+          ref.read(webSocketProvider).cannceled();
+        };
+        break;
+      case ConnectionStatusType.disconnected:
+      default:
+        iconData = Icons.connect_without_contact;
+        onPressed = () {
+          final url = 'ws://${ref.read(settingProvider).webSocketAddress}';
+          ref.read(webSocketProvider).connect(url);
+        };
+        break;
+    }
+
     Color bgColor = Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).scaffoldBackgroundColor;
 
     return GestureDetector(
@@ -102,14 +123,11 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
         title: Text('Wi-Fi : ${ssid ?? 'Unknown SSID'}', style: Styles.defaultStyle20),
         actions: [
           IconButton(
-            icon: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Icon(Icons.connect_without_contact, size: 30),
+            icon: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Icon(iconData, size: 30),
             ),
-            onPressed: (){
-              final url = 'ws://${ref.read(settingProvider).webSocketAddress}';
-              ref.read(webSocketProvider).connect(url);
-            },
+            onPressed: onPressed,
           )
         ],
       ),
@@ -232,89 +250,6 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
     }
   }
   
-  //void connectToWebSocket() async {
-  //  String message = 'connecting to ws://${ref.watch(settingProvider).webSocketAddress}';
-  //  insertLog(
-  //    ConsoleLog(dateTime: DateTime.now(), content: message, isError: false, fromRobot: false))
-  //  ;
-  //  showSnackBar(
-  //    context: context,
-  //    message: 'Connecting to ws://${ref.watch(settingProvider).webSocketAddress}',
-  //    type: SnackBarType.info,
-  //    duration: const Duration(seconds: 5),
-  //  );
-
-  //  try {
-  //    if (channel != null) {
-  //      await channel!.sink.close();
-  //    }
-  //    final url = 'ws://${ref.read(settingProvider).webSocketAddress}';
-  //    channel = IOWebSocketChannel.connect(Uri.parse(url));
-
-  //    channel!.stream.listen((message) {
-  //      insertLog(
-  //        ConsoleLog(dateTime: DateTime.now(), content: message, isError: false, fromRobot: false)
-  //      );
-  //      showSnackBar(
-  //        context: context,
-  //        message: message,
-  //        type: SnackBarType.info,
-  //        duration: const Duration(seconds: 5),
-  //      );
-  //    }, onError: (error) {
-  //      message = 'Stream error: $error';
-  //      insertLog(
-  //        ConsoleLog(dateTime: DateTime.now(), content: message, isError: true, fromRobot: false)
-  //      );
-  //      showSnackBar(
-  //        context: context,
-  //        message: message,
-  //        type: SnackBarType.error,
-  //        duration: const Duration(seconds: 5),
-  //      );
-  //    });
-  //  } on SocketException catch (e) {
-  //      message = 'SocketException: ${e.message}';
-  //      insertLog(
-  //        ConsoleLog(dateTime: DateTime.now(), content: message, isError: true, fromRobot: false)
-  //      );
-  //    showSnackBar(
-  //      context: context,
-  //      message: 'SocketException: ${e.message}',
-  //      type: SnackBarType.error,
-  //      duration: const Duration(seconds: 5),
-  //    );
-  //  } catch (e) {
-  //    message = 'Exception: $e';
-  //    insertLog(
-  //      ConsoleLog(dateTime: DateTime.now(), content: message, isError: true, fromRobot: false)
-  //    );
-  //    showSnackBar(
-  //      context: context,
-  //      message: 'Exception: $e',
-  //      type: SnackBarType.error,
-  //      duration: const Duration(seconds: 5),
-  //    );
-  //  }
-  //}
-
-  //void sendMessage(String message) {
-  //  if(channel != null){
-  //    showSnackBar(
-  //      context: context,
-  //      message: 'send $message',
-  //      type: SnackBarType.info
-  //    );
-  //    channel!.sink.add(message);
-  //  }else{
-  //    showSnackBar(
-  //      context: context,
-  //      message: 'not connected to WebSocket Server',
-  //      type: SnackBarType.error
-  //    );
-  //  }
-  //}
-
   Future<void> initConnectivity() async {
     final ConnectivityResult result = await Connectivity().checkConnectivity();
     await updateConnectionStatus(result);

@@ -16,13 +16,13 @@ class WebSocketProvider extends ChangeNotifier {
   WebSocketChannel? _channel;
   
   ConnectionStatusType _status = ConnectionStatusType.disconnected;
-  String _message = "";
+  String _statusMessage = "";
 
   get channel => _channel;
 
   get status  => _status;
 
-  get message => _message;
+  get statusMessage => _statusMessage;
 
   void connect(String uri) {
     // 接続状態を「接続中」に更新し、変更を通知
@@ -33,11 +33,14 @@ class WebSocketProvider extends ChangeNotifier {
         _channel?.sink.close();
       }
       _channel = IOWebSocketChannel.connect(Uri.parse(uri));
-
       _channel!.stream.listen(
         (message) {
           // 接続成功時の処理
-          updateStatus(ConnectionStatusType.connected, "Connected to $uri", SnackBarType.info);
+          if(_status == ConnectionStatusType.connecting){
+            updateStatus(ConnectionStatusType.connected, "Connected to $uri", SnackBarType.info);
+          }else{
+            receiveMessage(message);
+          }
         },
         onError: (error) {
           // ストリームエラー時の処理
@@ -59,6 +62,14 @@ class WebSocketProvider extends ChangeNotifier {
     }
   }
 
+  void cannceled() {
+    if (_channel != null) {
+      _channel!.sink.close();
+      _channel = null;
+      updateStatus(ConnectionStatusType.disconnected, "Canceled", SnackBarType.warning);
+    }
+  }
+
   void disconnect() {
     if (_channel != null) {
       _channel!.sink.close();
@@ -69,13 +80,24 @@ class WebSocketProvider extends ChangeNotifier {
 
   void updateStatus(ConnectionStatusType status, String message, SnackBarType snackBarType) {
     _status  = status;
-    _message = message;
+    _statusMessage = message;
 
     notifyListeners();
 
     showSnackBar(
       message: message,
       type: snackBarType,
+      duration: const Duration(seconds: 5),
+    );
+  }
+
+  void receiveMessage(String message) {
+
+    notifyListeners();
+
+    showSnackBar(
+      message: "Received message: $message",
+      type: SnackBarType.info,
       duration: const Duration(seconds: 5),
     );
   }
