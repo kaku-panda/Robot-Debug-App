@@ -40,6 +40,14 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
+                        'PID Control',
+                        style: Styles.defaultStyle20,
+                      ),
+                      Text(
+                        'Kp -> Ki -> Kd の順番で調整してください',
+                        style: Styles.defaultStyle20,
+                      ),
+                      Text(
                         'Kp: ${kp.round()}',
                         style: Styles.defaultStyle18,
                       ),
