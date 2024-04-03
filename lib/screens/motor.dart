@@ -28,81 +28,74 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
     double kd = ref.watch(settingProvider).kd;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
+      appBar: AppBar(
+        title: Text('PID Tuning', style: Styles.defaultStyle18),
+      ),
       body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32.0),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        'PID Control',
-                        style: Styles.defaultStyle20,
-                      ),
-                      Text(
-                        'Kp -> Ki -> Kd の順番で調整してください',
-                        style: Styles.defaultStyle20,
-                      ),
-                      Text(
-                        'Kp: ${kp.round()}',
-                        style: Styles.defaultStyle18,
-                      ),
-                      Slider(
-                        value: kp,
-                        activeColor: Styles.primaryColor,
-                        min: 0,
-                        max: 100,
-                        divisions: 100,
-                        label: kd.round().toString(),
-                        onChanged: (double value) {
-                          setState(() {
-                            updatePidValue('kp', value);
-                          });
-                        },
-                      ),
-                      Text(
-                        'Ki: ${ki.round()}',
-                        style: Styles.defaultStyle18,
-                      ),
-                      Slider(
-                        value: ki,
-                        activeColor: Styles.primaryColor,
-                        min: 0,
-                        max: 100,
-                        divisions: 100,
-                        label: ki.round().toString(),
-                        onChanged: (double value) {
-                          setState(() {
-                            updatePidValue('ki', value);
-                          });
-                        },
-                      ),
-                      Text(
-                        'Kd: ${kd.round()}',
-                        style: Styles.defaultStyle18,
-                      ),
-                      Slider(
-                        value: kd,
-                        activeColor: Styles.primaryColor,
-                        min: 0,
-                        max: 100,
-                        divisions: 100,
-                        label: kd.round().toString(),
-                        onChanged: (double value) {
-                          setState(() {
-                            updatePidValue('kd', value);
-                          });
-                        },
-                      ),
-                    ],
-                  ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 32.0),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  'Kp -> Ki -> Kd の順番で調整してください',
+                  style: Styles.defaultStyle18,
                 ),
-              ),
-            ],
+                Text(
+                  'Kp: ${kp.round()}',
+                  style: Styles.defaultStyle18,
+                ),
+                Slider(
+                  value: kp,
+                  activeColor: Styles.primaryColor,
+                  min: 0,
+                  max: 100,
+                  divisions: 100,
+                  label: kd.round().toString(),
+                  onChanged: (double value) {
+                    setState(() {
+                      updatePidValue('kp', value);
+                    });
+                  },
+                ),
+                Text(
+                  'Ki: ${ki.round()}',
+                  style: Styles.defaultStyle18,
+                ),
+                Slider(
+                  value: ki,
+                  activeColor: Styles.primaryColor,
+                  min: 0,
+                  max: 100,
+                  divisions: 100,
+                  label: ki.round().toString(),
+                  onChanged: (double value) {
+                    setState(() {
+                      updatePidValue('ki', value);
+                    });
+                  },
+                ),
+                Text(
+                  'Kd: ${kd.round()}',
+                  style: Styles.defaultStyle18,
+                ),
+                Slider(
+                  value: kd,
+                  activeColor: Styles.primaryColor,
+                  min: 0,
+                  max: 100,
+                  divisions: 100,
+                  label: kd.round().toString(),
+                  onChanged: (double value) {
+                    setState(() {
+                      updatePidValue('kd', value);
+                    });
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -16,9 +16,7 @@ Future<dynamic> showModalWindow(
 ) {
   return showModalBottomSheet(
     useRootNavigator: true,
-    //モーダルの背景の色、透過
     backgroundColor: Colors.transparent,
-    //ドラッグ可能にする（高さもハーフサイズからフルサイズになる様子）
     isScrollControlled: true,
     context: context,
     constraints: const BoxConstraints(
