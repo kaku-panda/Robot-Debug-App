@@ -26,8 +26,12 @@ class JoystickScreenState extends ConsumerState<JoystickScreen> with SingleTicke
   Animation<double>? _animationX;
   Animation<double>? _animationY;
 
-  int leftMotorSpeed  = 0;
-  int rightMotorSpeed = 0;
+  int leftMotorAccel          = 0;
+  int rightMotorAccel         = 0;
+  String leftMotorAccelForward   = "00";
+  String rightMotorAccelForward  = "00";
+  String leftMotorAccelBackward  = "00";
+  String rightMotorAccelBackward = "00";
 
   @override
   void initState() {
@@ -74,7 +78,7 @@ class JoystickScreenState extends ConsumerState<JoystickScreen> with SingleTicke
               alignment: Alignment.topCenter,
               child: Padding(
                 padding: const EdgeInsets.only(top: 150.0),
-                child: MotorSpeedDisplay(leftMotorSpeed: leftMotorSpeed, rightMotorSpeed: rightMotorSpeed),
+                child: MotorSpeedDisplay(leftMotorSpeed: leftMotorAccel, rightMotorSpeed: rightMotorAccel),
               ),
             ),
             Align(
@@ -85,10 +89,15 @@ class JoystickScreenState extends ConsumerState<JoystickScreen> with SingleTicke
                   final newX = _x + step * details.x;
                   final newY = _y + step * details.y;
 
-                  leftMotorSpeed  = (-details.y*100 + details.x*100).clamp(-100, 100).toInt();
-                  rightMotorSpeed = (-details.y*100 - details.x*100).clamp(-100, 100).toInt();
+                  leftMotorAccel  = (-details.y*255 + details.x*255).clamp(-255, 255).toInt();
+                  rightMotorAccel = (-details.y*255 - details.x*255).clamp(-255, 255).toInt();
                   
-                  String message = "accel ${((leftMotorSpeed & 0xFF) << 8) | (rightMotorSpeed & 0xFF)}";
+                  leftMotorAccelForward   = ((leftMotorAccel  <= 0) ? 0 : (leftMotorAccel   & 0xFF)).toRadixString(16).padLeft(2, "0");
+                  rightMotorAccelForward  = ((rightMotorAccel <= 0) ? 0 : (rightMotorAccel  & 0xFF)).toRadixString(16).padLeft(2, "0");
+                  leftMotorAccelBackward  = ((leftMotorAccel  >= 0) ? 0 : (-leftMotorAccel  & 0xFF)).toRadixString(16).padLeft(2, "0");
+                  rightMotorAccelBackward = ((rightMotorAccel >= 0) ? 0 : (-rightMotorAccel & 0xFF)).toRadixString(16).padLeft(2, "0");
+
+                  String message = "accel $leftMotorAccelForward$rightMotorAccelForward$leftMotorAccelBackward$rightMotorAccelBackward";
                   ref.read(webSocketProvider.notifier).sendMessage(message);
 
                   _animationX = Tween<double>(begin: _x, end: newX).animate(_controller!)

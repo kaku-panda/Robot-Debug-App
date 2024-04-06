@@ -45,7 +45,7 @@ class WebSocketProvider extends ChangeNotifier {
         },
         onError: (error) {
           // ストリームエラー時の処理
-          updateStatus(ConnectionStatusType.disconnected, "Stream error: $error", SnackBarType.error);
+          updateStatus(_status, "Stream error: $error", SnackBarType.error);
         },
       );
     } catch (e) {
