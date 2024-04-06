@@ -43,12 +43,12 @@ class AppNavigationBar extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.gamepad, size: 28),
               title: const Text('Joystick'),
-              onTap: () => navigationShell.goBranch(1),
+              onTap: () => navigationShell.goBranch(2),
             ),
             ListTile(
               leading: const Icon(Icons.settings, size: 28),
               title: const Text('Parameters'),
-              onTap: () => navigationShell.goBranch(2),
+              onTap: () => navigationShell.goBranch(3),
             ),
           ],
         ),
