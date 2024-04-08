@@ -54,7 +54,8 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
                   max: 100,
                   divisions: 100,
                   label: kd.round().toString(),
-                  onChanged: (double value) {
+                  onChanged: (value) => {},
+                  onChangeEnd: (double value) {
                     setState(() {
                       updatePidValue('kp', value);
                     });
@@ -71,7 +72,8 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
                   max: 100,
                   divisions: 100,
                   label: ki.round().toString(),
-                  onChanged: (double value) {
+                  onChanged: (value) => {},
+                  onChangeEnd: (double value) {
                     setState(() {
                       updatePidValue('ki', value);
                     });
@@ -88,7 +90,8 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
                   max: 100,
                   divisions: 100,
                   label: kd.round().toString(),
-                  onChanged: (double value) {
+                  onChanged: (value) => {},
+                  onChangeEnd: (double value) {
                     setState(() {
                       updatePidValue('kd', value);
                     });
