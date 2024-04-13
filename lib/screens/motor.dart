@@ -60,6 +60,7 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
                       updatePidValue('kp', value);
                     });
                   },
+                  
                 ),
                 Text(
                   'Ki: ${ki.round()}',
