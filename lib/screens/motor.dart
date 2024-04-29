@@ -23,6 +23,7 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
   Widget build(BuildContext context) {
 
 
+    double speed = ref.watch(settingProvider).speed;
     double kp = ref.watch(settingProvider).kp;
     double ki = ref.watch(settingProvider).ki;
     double kd = ref.watch(settingProvider).kd;
@@ -44,6 +45,23 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
                   style: Styles.defaultStyle18,
                 ),
                 Text(
+                  'Speed: $speed',
+                  style: Styles.defaultStyle18,
+                ),
+                Slider(
+                  value: speed,
+                  activeColor: Styles.primaryColor,
+                  min: 0.0,
+                  max: 1.0,
+                  divisions: 100,
+                  label: kd.round().toString(),
+                  onChanged: (double value) {
+                    setState(() {
+                      updatePidValue('speed', value);
+                    });
+                  },
+                ),
+                Text(
                   'Kp: $kp',
                   style: Styles.defaultStyle18,
                 ),
@@ -59,7 +77,6 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
                       updatePidValue('kp', value);
                     });
                   },
-                  
                 ),
                 Text(
                   'Ki: $ki',

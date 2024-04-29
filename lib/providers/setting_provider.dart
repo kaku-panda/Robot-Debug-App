@@ -20,9 +20,11 @@ class SettingProvider extends ChangeNotifier {
   double _appBarHeight        = 0.0;
   double _navigationBarHeight = 0.0;
 
+  double _speed = 0;
   double _kp = 0;
   double _ki = 0;
   double _kd = 0;
+  
 
   String get webSocketAddress => _webSocketAddress;
 
@@ -34,6 +36,7 @@ class SettingProvider extends ChangeNotifier {
   double get appBarHeight => _appBarHeight;
   double get navigationBarHeight => _navigationBarHeight;
 
+  double get speed => _speed;
   double get kp => _kp;
   double get ki => _ki;
   double get kd => _kd;
@@ -73,6 +76,11 @@ class SettingProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  set speed(double speed) {
+    _speed = speed;
+    notifyListeners();
+  }
+
   set kp(double kp) {
     _kp = kp;
     notifyListeners();
@@ -95,6 +103,7 @@ class SettingProvider extends ChangeNotifier {
     
     _webSocketAddress = prefs.getString('webSocketAddress') ?? '192.169.42.1:8081';
 
+    _speed = prefs.getDouble('speed') ?? 0;
     _kp = prefs.getDouble('kp') ?? 0;
     _ki = prefs.getDouble('ki') ?? 0;
     _kd = prefs.getDouble('kd') ?? 0;
@@ -106,6 +115,7 @@ class SettingProvider extends ChangeNotifier {
     prefs.setBool('enableDarkTheme', _enableDarkTheme);
     prefs.setBool('defaultShiftView', _defaultShiftView);
     prefs.setString('webSocketAddress', _webSocketAddress);
+    prefs.setDouble('speed', _speed);
     prefs.setDouble('kp', _kp);
     prefs.setDouble('ki', _ki);
     prefs.setDouble('kd', _kd);
