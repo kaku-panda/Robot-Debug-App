@@ -134,6 +134,9 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
         case 'kd':
           ref.read(settingProvider).kd = value;
           break;
+        case 'speed':
+          ref.read(settingProvider).speed = value;
+          break;
       }
       ref.read(settingProvider).storePreferences();
 
