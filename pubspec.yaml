@@ -51,7 +51,7 @@ dependencies:
   settings_ui: ^2.0.2
   sqflite: ^2.3.2
   path: ^1.9.0
-  intl: ^0.18.1
+  intl: ^0.19.0
   flutter_joystick: ^0.0.4
 
 dev_dependencies:

@@ -44,18 +44,17 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
                   style: Styles.defaultStyle18,
                 ),
                 Text(
-                  'Kp: ${kp.round()}',
+                  'Kp: $kp',
                   style: Styles.defaultStyle18,
                 ),
                 Slider(
                   value: kp,
                   activeColor: Styles.primaryColor,
-                  min: 0,
-                  max: 100,
+                  min: 0.0,
+                  max: 0.5,
                   divisions: 100,
                   label: kd.round().toString(),
-                  onChanged: (value) => {},
-                  onChangeEnd: (double value) {
+                  onChanged: (double value) {
                     setState(() {
                       updatePidValue('kp', value);
                     });
@@ -63,36 +62,34 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
                   
                 ),
                 Text(
-                  'Ki: ${ki.round()}',
+                  'Ki: $ki',
                   style: Styles.defaultStyle18,
                 ),
                 Slider(
                   value: ki,
                   activeColor: Styles.primaryColor,
                   min: 0,
-                  max: 100,
+                  max: 5,
                   divisions: 100,
                   label: ki.round().toString(),
-                  onChanged: (value) => {},
-                  onChangeEnd: (double value) {
+                  onChanged: (double value) {
                     setState(() {
                       updatePidValue('ki', value);
                     });
                   },
                 ),
                 Text(
-                  'Kd: ${kd.round()}',
+                  'Kd: $kd',
                   style: Styles.defaultStyle18,
                 ),
                 Slider(
                   value: kd,
                   activeColor: Styles.primaryColor,
                   min: 0,
-                  max: 100,
-                  divisions: 100,
+                  max: 10,
+                  divisions: 1000,
                   label: kd.round().toString(),
-                  onChanged: (value) => {},
-                  onChangeEnd: (double value) {
+                  onChanged: (double value) {
                     setState(() {
                       updatePidValue('kd', value);
                     });
@@ -123,7 +120,7 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
       }
       ref.read(settingProvider).storePreferences();
 
-      final String message = 'PID:$type:$value';
+      final String message = 'PID:$type:${value.toStringAsFixed(3)};';
       ref.read(webSocketProvider.notifier).sendMessage(message);
 
     } else {
