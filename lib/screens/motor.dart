@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:robo_debug_app/components/button.dart';
 import 'package:robo_debug_app/components/snackbar.dart';
 import 'package:robo_debug_app/components/style.dart';
 import 'package:robo_debug_app/main.dart';
@@ -40,9 +41,35 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(
-                  'Kp -> Ki -> Kd の順番で調整してください',
-                  style: Styles.defaultStyle18,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    CustomTextButton(
+                      text: "START!",
+                      backgroundColor: Styles.darkBgColor,
+                      enable: true,
+                      width: 100,
+                      height: 60,
+                      onPressed: () {
+                        ref.read(webSocketProvider.notifier).sendMessage('PID:kp:${ref.read(settingProvider).kp.toStringAsFixed(3)};');
+                        ref.read(webSocketProvider.notifier).sendMessage('PID:ki:${ref.read(settingProvider).ki.toStringAsFixed(3)};');
+                        ref.read(webSocketProvider.notifier).sendMessage('PID:kd:${ref.read(settingProvider).kd.toStringAsFixed(3)};');
+                        ref.read(webSocketProvider.notifier).sendMessage('PID:speed:${ref.read(settingProvider).speed.toStringAsFixed(3)};');
+                        ref.read(webSocketProvider.notifier).sendMessage("start");
+                      },
+                    ),
+                    CustomTextButton(
+                      text: "STOP!",
+                      backgroundColor: Styles.darkBgColor,
+                      enable: true,
+                      width: 100,
+                      height: 60,
+                      onPressed: () {
+                        ref.read(webSocketProvider.notifier).sendMessage("stop");
+                      },
+                    ),
+
+                  ],
                 ),
                 Text(
                   'Speed: $speed',
@@ -53,7 +80,7 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
                   activeColor: Styles.primaryColor,
                   min: 0.0,
                   max: 1.0,
-                  divisions: 100,
+                  divisions: 1000,
                   label: kd.round().toString(),
                   onChanged: (double value) {
                     setState(() {
@@ -70,7 +97,7 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
                   activeColor: Styles.primaryColor,
                   min: 0.0,
                   max: 0.5,
-                  divisions: 100,
+                  divisions: 1000,
                   label: kd.round().toString(),
                   onChanged: (double value) {
                     setState(() {
@@ -86,8 +113,8 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
                   value: ki,
                   activeColor: Styles.primaryColor,
                   min: 0,
-                  max: 5,
-                  divisions: 100,
+                  max: 0.01,
+                  divisions: 1000,
                   label: ki.round().toString(),
                   onChanged: (double value) {
                     setState(() {
