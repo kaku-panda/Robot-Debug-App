@@ -71,74 +71,98 @@ class MotorScreenState extends ConsumerState<MotorScreen> {
 
                   ],
                 ),
-                Text(
-                  'Speed: $speed',
-                  style: Styles.defaultStyle18,
+                Row(
+                  children: [
+                    Text(
+                      'Speed: $speed',
+                      style: Styles.defaultStyle18,
+                    ),
+                    Expanded(
+                      child: Slider(
+                        value: speed,
+                        activeColor: Styles.primaryColor,
+                        min: 0.0,
+                        max: 1.0,
+                        divisions: 1000,
+                        label: kd.round().toString(),
+                        onChanged: (double value) {
+                          setState(() {
+                            updatePidValue('speed', value);
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                Slider(
-                  value: speed,
-                  activeColor: Styles.primaryColor,
-                  min: 0.0,
-                  max: 1.0,
-                  divisions: 1000,
-                  label: kd.round().toString(),
-                  onChanged: (double value) {
-                    setState(() {
-                      updatePidValue('speed', value);
-                    });
-                  },
+                Row(
+                  children: [
+                    Text(
+                      'Kp: $kp',
+                      style: Styles.defaultStyle18,
+                    ),
+                    Expanded(
+                      child: Slider(
+                        value: kp,
+                        activeColor: Styles.primaryColor,
+                        min: 0.0,
+                        max: 0.5,
+                        divisions: 1000,
+                        label: kd.round().toString(),
+                        onChanged: (double value) {
+                          setState(() {
+                            updatePidValue('kp', value);
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  'Kp: $kp',
-                  style: Styles.defaultStyle18,
+                Row(
+                  children: [
+                    Text(
+                      'Ki: $ki',
+                      style: Styles.defaultStyle18,
+                    ),
+                    Expanded(
+                      child: Slider(
+                        value: ki,
+                        activeColor: Styles.primaryColor,
+                        min: 0,
+                        max: 0.01,
+                        divisions: 1000,
+                        label: ki.round().toString(),
+                        onChanged: (double value) {
+                          setState(() {
+                            updatePidValue('ki', value);
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                Slider(
-                  value: kp,
-                  activeColor: Styles.primaryColor,
-                  min: 0.0,
-                  max: 0.5,
-                  divisions: 1000,
-                  label: kd.round().toString(),
-                  onChanged: (double value) {
-                    setState(() {
-                      updatePidValue('kp', value);
-                    });
-                  },
-                ),
-                Text(
-                  'Ki: $ki',
-                  style: Styles.defaultStyle18,
-                ),
-                Slider(
-                  value: ki,
-                  activeColor: Styles.primaryColor,
-                  min: 0,
-                  max: 0.01,
-                  divisions: 1000,
-                  label: ki.round().toString(),
-                  onChanged: (double value) {
-                    setState(() {
-                      updatePidValue('ki', value);
-                    });
-                  },
-                ),
-                Text(
-                  'Kd: $kd',
-                  style: Styles.defaultStyle18,
-                ),
-                Slider(
-                  value: kd,
-                  activeColor: Styles.primaryColor,
-                  min: 0,
-                  max: 10,
-                  divisions: 1000,
-                  label: kd.round().toString(),
-                  onChanged: (double value) {
-                    setState(() {
-                      updatePidValue('kd', value);
-                    });
-                  },
-                ),
+                Row(
+                  children: [
+                    Text(
+                      'Kd: $kd',
+                      style: Styles.defaultStyle18,
+                    ),
+                    Expanded(
+                      child: Slider(
+                        value: kd,
+                        activeColor: Styles.primaryColor,
+                        min: 0,
+                        max: 10,
+                        divisions: 1000,
+                        label: kd.round().toString(),
+                        onChanged: (double value) {
+                          setState(() {
+                            updatePidValue('kd', value);
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                )
               ],
             ),
           ),
