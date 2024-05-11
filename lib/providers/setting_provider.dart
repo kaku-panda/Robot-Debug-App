@@ -24,7 +24,11 @@ class SettingProvider extends ChangeNotifier {
   double _kp = 0;
   double _ki = 0;
   double _kd = 0;
-  
+
+  double _sensor43 = 0;
+  double _sensor52 = 0;
+  double _sensor61 = 0;
+  double _sensor70 = 0;
 
   String get webSocketAddress => _webSocketAddress;
 
@@ -40,6 +44,11 @@ class SettingProvider extends ChangeNotifier {
   double get kp => _kp;
   double get ki => _ki;
   double get kd => _kd;
+
+  double get sensor43 => _sensor43;
+  double get sensor52 => _sensor52;
+  double get sensor61 => _sensor61;
+  double get sensor70 => _sensor70;
 
   set webSocketAddress(String result) {
     _webSocketAddress = result;
@@ -94,7 +103,27 @@ class SettingProvider extends ChangeNotifier {
   set kd(double kd) {
     _kd = kd;
     notifyListeners();
-  } 
+  }
+
+  set sensor43(double sensor43) {
+    _sensor43 = sensor43;
+    notifyListeners();
+  }
+
+  set sensor52(double sensor52) {
+    _sensor52 = sensor52;
+    notifyListeners();
+  }
+
+  set sensor61(double sensor61) {
+    _sensor61 = sensor61;
+    notifyListeners();
+  }
+
+  set sensor70(double sensor70) {
+    _sensor70 = sensor70;
+    notifyListeners();
+  }
 
   Future loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
@@ -107,6 +136,11 @@ class SettingProvider extends ChangeNotifier {
     _kp = prefs.getDouble('kp') ?? 0;
     _ki = prefs.getDouble('ki') ?? 0;
     _kd = prefs.getDouble('kd') ?? 0;
+    _sensor43 = prefs.getDouble('sensor43') ?? 0;
+    _sensor52 = prefs.getDouble('sensor52') ?? 0;
+    _sensor61 = prefs.getDouble('sensor61') ?? 0;
+    _sensor70 = prefs.getDouble('sensor70') ?? 0;
+
     notifyListeners();
   }
 
@@ -119,6 +153,10 @@ class SettingProvider extends ChangeNotifier {
     prefs.setDouble('kp', _kp);
     prefs.setDouble('ki', _ki);
     prefs.setDouble('kd', _kd);
+    prefs.setDouble('sensor43', _sensor43);
+    prefs.setDouble('sensor52', _sensor52);
+    prefs.setDouble('sensor61', _sensor61);
+    prefs.setDouble('sensor70', _sensor70);
     notifyListeners();
   }
 }
