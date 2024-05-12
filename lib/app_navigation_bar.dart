@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:robo_debug_app/components/style.dart';
-import 'package:robo_debug_app/components/pop_icons.dart';
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 /// App Widget
@@ -25,6 +24,7 @@ class AppNavigationBar extends ConsumerWidget {
 
     var isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: navigationShell,
       drawer: isLandscape ? Drawer(
         child: ListView(
@@ -53,52 +53,40 @@ class AppNavigationBar extends ConsumerWidget {
           ],
         ),
       ) : null,
-      resizeToAvoidBottomInset: true,
-      bottomNavigationBar: !isLandscape ? Container(
-        height: 56.0 + MediaQuery.of(context).padding.bottom,
-        decoration: const BoxDecoration(
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: Colors.grey,
-              blurRadius: 0.3,
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          currentIndex: currentIndex,
-          selectedFontSize: 11,
-          unselectedFontSize: 10,
-          onTap: (index) async {
-            navigationShell.goBranch(
-              index,
-              initialLocation: index == navigationShell.currentIndex,
-            );
-          },
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.car_rental, size: 24),
-              activeIcon: Icon(Icons.car_rental, size: 28),
-              label: 'Motor',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.chat, size: 24),
-              activeIcon: Icon(Icons.chat, size: 28),
-              label: 'Console',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.gamepad, size: 24),
-              activeIcon: Icon(Icons.gamepad, size: 28),
-              label: 'Joystick',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings, size: 24),
-              activeIcon: Icon(Icons.settings, size: 28),
-              label: 'Parameters',
-            ),
-          ],
-          fixedColor: Styles.primaryColor,
-        ),
+      bottomNavigationBar: !isLandscape ? BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: currentIndex,
+        selectedFontSize: 11,
+        unselectedFontSize: 10,
+        onTap: (index) async {
+          navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
+          );
+        },
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.car_rental, size: 24),
+            activeIcon: Icon(Icons.car_rental, size: 28),
+            label: 'Motor',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat, size: 24),
+            activeIcon: Icon(Icons.chat, size: 28),
+            label: 'Console',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.gamepad, size: 24),
+            activeIcon: Icon(Icons.gamepad, size: 28),
+            label: 'Joystick',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings, size: 24),
+            activeIcon: Icon(Icons.settings, size: 28),
+            label: 'Parameters',
+          ),
+        ],
+        fixedColor: Styles.primaryColor,
       ) : null,
     );
     

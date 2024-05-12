@@ -103,4 +103,6 @@ class WebSocketProvider extends ChangeNotifier {
       duration: const Duration(seconds: 5),
     );
   }
+
+  void updateSensorValue(String type, int roundedValue) {}
 }

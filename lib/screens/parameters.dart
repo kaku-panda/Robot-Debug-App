@@ -69,7 +69,7 @@ class SettingScreenState extends ConsumerState<ParametersScreen> {
                   onPressed: (value) {
                     setState(
                       () {
-                        showModalWindow(
+                        showCustomModalWindow(
                           context,
                           0.5,
                           buildModalWindowContainer(

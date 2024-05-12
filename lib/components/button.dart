@@ -17,14 +17,14 @@ class ToolButton extends StatelessWidget {
   final Function? onLongPressed;
 
   const ToolButton({
-    Key? key,
+    super.key,
     required this.icon,
     required this.pressEnable,
     required this.width,
     this.offEnable = false,
     this.onPressed,
     this.onLongPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +97,7 @@ class CustomTextButton extends StatelessWidget {
   final Function  onPressed;
 
   const CustomTextButton({
-    Key? key,
+    super.key,
     this.icon,
     required this.text,
     required this.backgroundColor,
@@ -105,7 +105,7 @@ class CustomTextButton extends StatelessWidget {
     required this.width,
     required this.height,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -166,13 +166,13 @@ class CustomIconButton extends StatelessWidget {
   final Function action;
 
   const CustomIconButton({
-    Key? key,
+    super.key,
     required this.icon,
     required this.enable,
     required this.width,
     required this.height,
     required this.action,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -212,14 +212,14 @@ class BottomButton extends StatelessWidget {
   final Function? onLongPressed;
 
   const BottomButton({
-    Key? key,
+    super.key,
     required this.content,
     required this.enable,
     required this.width,
     required this.height,
     this.onPressed,
     this.onLongPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -131,41 +131,43 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
           )
         ],
       ),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10,),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    itemCount: logs.length,
-                    itemBuilder: (context, index){
-                      return logs[index].fromRobot ? Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text('${logs[index].content} ', style: logs[index].isError ? Styles.defaultStyleRed15 : Styles.defaultStyleGreen15),
-                          Expanded(
-                            child: Text('[${DateFormat('MM/dd/hh:mm:ss').format(logs[index].dateTime)}] <', style: Styles.defaultStyleGrey13, softWrap: true,),
-                          ),
-                        ],
-                      )
-                      : Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('> [${DateFormat('MM/dd/hh:mm:ss').format(logs[index].dateTime)}]', style: Styles.defaultStyleGrey13),
-                          Expanded(
-                            child: Text(' ${logs[index].content}', style: logs[index].isError ? Styles.defaultStyleRed15 : Styles.defaultStyleGreen15, softWrap: true,),
-                          ),
-                        ],
-                      );
-                    }
-                  ),
+        body: Container(
+          decoration: Theme.of(context).platform == TargetPlatform.iOS ? BoxDecoration(
+            border: Border(
+              top: BorderSide(color: Colors.grey[200]!),
+            ),
+          ): null,
+          child: Column(
+            children: [
+              Flexible(
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemCount: logs.length,
+                  itemBuilder: (context, index){
+                    return logs[index].fromRobot ? Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text('${logs[index].content} ', style: logs[index].isError ? Styles.defaultStyleRed15 : Styles.defaultStyleGreen15),
+                        Text('[${DateFormat('MM/dd/hh:mm:ss').format(logs[index].dateTime)}] <', style: Styles.defaultStyleGrey13, softWrap: true,),
+                      ],
+                    )
+                    : Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('> [${DateFormat('MM/dd/hh:mm:ss').format(logs[index].dateTime)}]', style: Styles.defaultStyleGrey13),
+                        Expanded(
+                          child: Text(' ${logs[index].content}', style: logs[index].isError ? Styles.defaultStyleRed15 : Styles.defaultStyleGreen15, softWrap: true,),
+                        ),
+                      ],
+                    );
+                  }
                 ),
-                SizedBox(
-                  height: screenSize.height * 0.1,
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                padding: const EdgeInsets.only(bottom: 10.0),
+                child: Flexible(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10.0),
                     child: TextField(
@@ -198,20 +200,20 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
                       textInputAction: TextInputAction.go,
                       onTap: () {
                         FocusScope.of(context).requestFocus(focusNode);
+                        scrollToBottom();
                       },
                       onSubmitted: (value){
                         insertLog(
                           ConsoleLog(dateTime: DateTime.now(), content: textController.text, isError: false, fromRobot: false),
                         );
-                        //sendMessage(value);
                         ref.read(webSocketProvider).sendMessage(value);
                         textController.clear();
                       },
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -241,13 +243,14 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
   }
 
   void scrollToBottom() {
-    if (scrollController.hasClients) {
-      scrollController.animateTo(
-        scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.easeOut,
-      );
-    }
+    // if (scrollController.hasClients) {
+    //   scrollController.animateTo(
+    //     scrollController.position.maxScrollExtent,
+    //     duration: const Duration(milliseconds: 100),
+    //     curve: Curves.easeOut,
+    //   );
+    // }
+    scrollController.jumpTo(scrollController.position.maxScrollExtent);
   }
   
   Future<void> initConnectivity() async {

@@ -9,7 +9,7 @@ import 'package:robo_debug_app/components/style.dart';
 /// Show Modal Window
 //////////////////////////////////////////////////////////////////////
 
-Future<dynamic> showModalWindow(
+Future<dynamic> showCustomModalWindow(
   BuildContext context,
   double height,
   Widget child,
