@@ -439,14 +439,8 @@ class MotorScreenState extends ConsumerState<MotorScreen> with SingleTickerProvi
 
   void updateSensorRange(int min, int max){
 
-    print(ref.read(settingProvider).sensorMax);
-    print(ref.read(settingProvider).sensorMin);
-    
     ref.read(settingProvider).sensorMin = min;
     ref.read(settingProvider).sensorMax = max;
-
-    print(ref.read(settingProvider).sensorMax);
-    print(ref.read(settingProvider).sensorMin);
 
     for(int i = 0; i < 8; i++){
       if (ref.read(settingProvider).sensor[i] < min) {
