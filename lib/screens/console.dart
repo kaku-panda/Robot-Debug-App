@@ -142,7 +142,7 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
                   return logs[index].fromRobot ? Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text('${logs[index].content} ', style: logs[index].isError ? Styles.defaultStyleRed15 : Styles.defaultStyleGreen15),
+                      Text('${logs[index].content} ', style: logs[index].isError ? Styles.defaultStyleRed13 : Styles.defaultStyleGreen13),
                       Text('[${DateFormat('MM/dd/hh:mm:ss').format(logs[index].dateTime)}] <', style: Styles.defaultStyleGrey13, softWrap: true,),
                     ],
                   )
@@ -151,9 +151,7 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('> [${DateFormat('MM/dd/hh:mm:ss').format(logs[index].dateTime)}]', style: Styles.defaultStyleGrey13),
-                      Expanded(
-                        child: Text(' ${logs[index].content}', style: logs[index].isError ? Styles.defaultStyleRed15 : Styles.defaultStyleGreen15, softWrap: true,),
-                      ),
+                      Text(' ${logs[index].content}', style: logs[index].isError ? Styles.defaultStyleRed13 : Styles.defaultStyleGreen13, softWrap: true,),
                     ],
                   );
                 }
@@ -212,24 +210,24 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
   }
 
   fetchConsoleLog() async {
-    List<Map<String, dynamic>> result = await dbHelper.getAllData();
+    List<Map<String, dynamic>> result = await dbHelper.getAllData('consoleLogTable');
     logs = result.map((map) => ConsoleLog.fromMap(map)).toList();
     scrollToBottom();
   }
 
   insertLog(ConsoleLog log) async {
-    dbHelper.insertData(log.toMap()).then((value){
+    dbHelper.insertData('consoleLogTable', log.toMap()).then((value){
       fetchConsoleLog();
     });
   }
   
   updateLog(ConsoleLog log) async {
-    await dbHelper.updateData(log.id!, log.toMap());
+    await dbHelper.updateData('consoleLogTable',log.id!, log.toMap());
     fetchConsoleLog();
   }
 
   deleteLog(ConsoleLog log) async {
-    await dbHelper.deleteData(log.id!);
+    await dbHelper.deleteData('consoleLogTable', log.id!);
     fetchConsoleLog();
   }
 

@@ -24,6 +24,7 @@ class AppNavigationBar extends ConsumerWidget {
 
     var isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
     return Scaffold(
+      resizeToAvoidBottomInset: currentIndex == 0 ? false : true,
       body: navigationShell,
       drawer: isLandscape ? Drawer(
         child: ListView(

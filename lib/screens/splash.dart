@@ -33,7 +33,7 @@ class SplashScreenState extends ConsumerState<SplashScreen> with DeepLinkMixin{
 
   splashScreenTimer(){
     Timer(const Duration(milliseconds: 1000), () async{
-      context.go('/console');
+      context.go('/motor');
     });
   }
 
