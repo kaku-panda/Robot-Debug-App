@@ -3,23 +3,23 @@ This app is a smartphone application for remotely controlling a line-following r
 
 ### Main Features
 Speed Adjustment: Set the robot's speed using a slider.
-![Line Following Robot](img/IMG_4790.PNG)
+<img src="img/IMG_4790.PNG" width="200">
 
 PID Parameter Adjustment: Adjust each PID control parameter (Kp, Ki, Kd) in real-time.
-![Line Following Robot](img/IMG_4791.PNG)
+<img src="img/IMG_4791.PNG" width="200">
 
 Sensor Value Adjustment: Check and adjust the values of each sensor.
-![Line Following Robot](img/IMG_4792.PNG)
+<img src="img/IMG_4792.PNG" width="200">
 
 Parameter Save/Load: Save the adjusted parameters and load them later.
-![Line Following Robot](img/IMG_4793.PNG)
-![Line Following Robot](img/IMG_4794.PNG)
+<img src="img/IMG_4793.PNG" width="200">
+<img src="img/IMG_4794.PNG" width="200">
 
 Joystick Operation: Manually control the robot using a joystick.
-![Line Following Robot](img/IMG_4795.PNG)
+<img src="img/IMG_4795.PNG" width="200">
 
 Console: Check and send logs or commands.
-![Line Following Robot](img/IMG_4797.PNG)
+<img src="img/IMG_4797.PNG" width="200">
 
 ### How to Use
 Launch the app.
