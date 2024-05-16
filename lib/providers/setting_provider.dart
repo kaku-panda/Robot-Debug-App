@@ -211,7 +211,7 @@ class SettingProvider extends ChangeNotifier {
     prefs.setDouble('speedMax', _speedMax);
     prefs.setDouble('speedMin', _speedMin);
     prefs.setDouble('kp', _kp);
-    prefs.setDouble('kpMax', _kiMax);
+    prefs.setDouble('kpMax', _kpMax);
     prefs.setDouble('kpMin', _kpMin);
     prefs.setDouble('ki', _ki);
     prefs.setDouble('kiMax', _kiMax);

@@ -98,7 +98,7 @@ class HomeScreenState extends ConsumerState<ConsoleScreen> with SingleTickerProv
       case ConnectionStatusType.connecting:
         iconData = Icons.cancel;
         onPressed = () {
-          ref.read(webSocketProvider).cannceled();
+          ref.read(webSocketProvider).cancel();
         };
         break;
       case ConnectionStatusType.disconnected:

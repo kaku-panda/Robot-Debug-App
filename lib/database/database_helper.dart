@@ -1,4 +1,3 @@
-import 'package:robo_debug_app/database/console_log.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 

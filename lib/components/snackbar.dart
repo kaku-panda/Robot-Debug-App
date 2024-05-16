@@ -6,7 +6,7 @@ enum SnackBarType { info, warning, error }
 
 class SnackBarManager {
   static final List<OverlayEntry> _snackBars = [];
-  static const int maxSnackBars = 2;
+  static const int maxSnackBars = 1;
   
   static void removeSnackBar(OverlayEntry entry) {
     _snackBars.remove(entry);

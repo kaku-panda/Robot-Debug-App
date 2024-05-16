@@ -114,6 +114,7 @@ class MotorScreenState extends ConsumerState<MotorScreen> with SingleTickerProvi
                         for(int i = 0; i < 8; i++){
                           ref.read(webSocketProvider.notifier).sendMessage('Sensor:sensor$i:${ref.read(settingProvider).sensor[i].toStringAsFixed(3)};');
                         }
+                        ref.read(webSocketProvider.notifier).sendMessage("start");
                       },
                     ),
                     CustomTextButton(
@@ -500,21 +501,6 @@ class MotorScreenState extends ConsumerState<MotorScreen> with SingleTickerProvi
                             children: [
                               const SizedBox(height: 20),
                               ParamEditor(
-                                title: 'Ki',
-                                textController: kiController, 
-                                value: ki,
-                                min: kiMin,
-                                max: kiMax,
-                                updateValue: (String type, num value){
-                                  updatePidValue(type, value.toDouble());
-                                  kiController.text = value.toString();
-                                },
-                                updateRange: (String type, num min, num max){
-                                  updatePidRange(type, min.toDouble(), max.toDouble());
-                                },
-                                type: 'ki'
-                              ),
-                              ParamEditor(
                                 title: 'Kp',
                                 textController: kpController, 
                                 value: kp,
@@ -528,6 +514,21 @@ class MotorScreenState extends ConsumerState<MotorScreen> with SingleTickerProvi
                                   updatePidRange(type, min.toDouble(), max.toDouble());
                                 },
                                 type: 'kp'
+                              ),
+                              ParamEditor(
+                                title: 'Ki',
+                                textController: kiController, 
+                                value: ki,
+                                min: kiMin,
+                                max: kiMax,
+                                updateValue: (String type, num value){
+                                  updatePidValue(type, value.toDouble());
+                                  kiController.text = value.toString();
+                                },
+                                updateRange: (String type, num min, num max){
+                                  updatePidRange(type, min.toDouble(), max.toDouble());
+                                },
+                                type: 'ki'
                               ),
                               ParamEditor(
                                 title: 'Kd',

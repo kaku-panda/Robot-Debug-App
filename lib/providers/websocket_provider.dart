@@ -64,7 +64,7 @@ class WebSocketProvider extends ChangeNotifier {
     }
   }
 
-  void cannceled() {
+  void cancel() {
     if (_channel != null) {
       _channel!.sink.close();
       _channel = null;
