@@ -64,6 +64,7 @@ class SettingProvider extends ChangeNotifier {
     _webSocketAddress = result;
     notifyListeners();
   }
+  
 
   set enableDarkTheme(bool result) {
     _enableDarkTheme = result;
